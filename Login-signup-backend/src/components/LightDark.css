@@ -1,0 +1,60 @@
+
+#dark-mode {
+    /* background-color: #333; */
+    background-color: #162938;
+    color: #fff;
+    backdrop-filter: blur(7px);
+    box-shadow: 0 0 10 rgba(0,0,0,.2);
+    border-radius: 10px;
+}
+
+#dark-mode .container {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.3);
+}
+
+#dark-mode .text,
+#dark-mode .input input,
+#dark-mode .input input::placeholder,
+#dark-mode .submit  {
+    color: #fff;
+}
+
+
+#dark-mode .underline {
+    background: #fff;
+}
+
+#dark-mode .input {
+    border-color: rgba(255,255,255,0.3);
+}
+
+.dark-mode .submit {
+     background: white; 
+    color: black;
+}
+
+#dark-mode .forgotpass,
+#dark-mode .newbtn.forgotpas {
+    color: white;
+}
+
+
+
+#dark-mode .hrefbutton {
+    color: #66b3ff;
+}
+
+#dark-mode .error{
+    color: white;
+}
+
+#dark-mode .showerror{
+   
+        display: flex;
+        flex-direction: coloumn;
+        justify-content: center;
+        align-items: center;
+
+}
+
