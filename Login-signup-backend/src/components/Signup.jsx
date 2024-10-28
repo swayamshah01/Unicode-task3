@@ -1,20 +1,25 @@
 import React, { useState } from "react";
 import "./Slider.css";
-import "./LightDark.css"
+import "./LightDark.css";
 import emailicon from "../assets/email.png";
 import personicon from "../assets/person.png";
 import passwordicon from "../assets/password.png";
-import { useNavigate  } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import axios from "../Api get/Axios";
 
-const Signup = ({ darkMode, setDarkMode }) => {
-  let Navigate= useNavigate();
-  const checkuser = /^[A-Za-z. ]{3,30}$/;
-  const mobilecheck = /^[0-9]{10}$/;
-  const emailcheck = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+const Signup = ({ darkMode, setDarkMode, userData, setUserData }) => {
+  let Navigate = useNavigate();
+  const checkname = /^[A-Za-z. ]{3,30}$/;
+  const emailcheck =/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+  const checkUser =/^[a-zA-Z0-9]+([a-zA-Z0-9](_|-| )[a-zA-Z0-9])*[a-zA-Z0-9]+$/;
+  const checkDate = /^(?:0[1-9]|[12]\d|3[01])([\/.-])(?:0[1-9]|1[012])\1(?:19|20)\d\d$/
+
+  const [Username, setUserName] = useState("");
+  const [UsernameError, setUserNameError] = useState("");
 
   const [name, setName] = useState("");
-  const [nameError, setNameError] = useState("");
+  const [nameError, setnameError] = useState("");
 
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -25,18 +30,46 @@ const Signup = ({ darkMode, setDarkMode }) => {
   const [password, setPassword] = useState("");
   const [passError, setPassError] = useState("");
 
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [confirmPassError, setConfirmPassError] = useState("");
+  const[date,setDate] = useState("");
+  const[dateError, setDateError] = useState("");
+
+  const getdata = async () => {
+    const response = await axios.post(
+      "https://auth-backend-138t.onrender.com/api/v1/users/register",
+      { email: email, password: password , name: name , username:Username ,  phonenumber:phonenumber , date:date});
+    console.log(response);
+  };
+
+  const handleDate = (e) =>{
+    const date_u = e.target.value;
+    setDate(date_u);
+    if(date_u &&  !checkDate.test(date_u)){
+      setDateError("enter date in dd/mm/yyyy format");
+    }
+    else{
+      setDateError("");
+    }
+  };
+
+  const handleUsername = (e) => {
+    const username_u = e.target.value;
+    setUserName(username_u);
+    if (username_u && !checkUser.test(username_u)) {
+      setUserNameError("username unavailable");
+    } else {
+      setUserNameError("");
+    }
+  };
 
   const handleName = (e) => {
     const name_u = e.target.value;
     setName(name_u);
-    if (name_u && !checkuser.test(name_u)) {
-      setNameError(
+    if (name_u && !checkname.test(name_u)) {
+      setnameError(
         "Invalid username (3-30 characters, letters, spaces, and dots only)"
       );
     } else {
-      setNameError("");
+      setnameError("");
     }
   };
 
@@ -79,21 +112,6 @@ const Signup = ({ darkMode, setDarkMode }) => {
     } else {
       setPassError("");
     }
-    if (confirmPassword && pass_u !== confirmPassword) {
-      setConfirmPassError("Passwords do not match");
-    } else {
-      setConfirmPassError("");
-    }
-  };
-
-  const handleConfirmPassword = (e) => {
-    const confirmPass = e.target.value;
-    setConfirmPassword(confirmPass);
-    if (confirmPass && confirmPass !== password) {
-      setConfirmPassError("Passwords do not match");
-    } else {
-      setConfirmPassError("");
-    }
   };
 
   const handleclick = (e) => {
@@ -102,12 +120,10 @@ const Signup = ({ darkMode, setDarkMode }) => {
     let errorMessages = [];
 
     //checking regex
-    if (emailError ||  passError || confirmPassError ||  phoneError ||  nameError) {
-
-
+    if (emailError || passError || UsernameError || phoneError || nameError || dateError) {
       isValid = false;
       errorMessages.push("Please fix all validation errors before submitting.");
-  }
+    }
     if (!email) {
       setEmailError("Email is required");
       errorMessages.push("Email is required");
@@ -124,11 +140,7 @@ const Signup = ({ darkMode, setDarkMode }) => {
       errorMessages.push("Phone number is required");
       isValid = false;
     }
-    if (!confirmPassword) {
-      setConfirmPassError("Please confirm your password");
-      errorMessages.push("Password confirmation is required");
-      isValid = false;
-    }
+
 
     if (!password) {
       setPassError("Password is required");
@@ -136,27 +148,37 @@ const Signup = ({ darkMode, setDarkMode }) => {
       isValid = false;
     }
 
+    if(!date){
+      setDateError("Date  is required");
+      errorMessages.push("Date is required");
+      isValid=false;
+    }
+
     if (isValid) {
       console.log("Form submitted successfully");
 
-      const formData = {
-        email,
-        password,
-        name,
-        phonenumber,
-      };
+      const formData = [
+        {
+          email,
+          password,
+          name,
+          phonenumber,
+          date,
+        },
+      ];
       console.log("Form data:", formData);
+      setUserData(formData);
 
-
+      getdata();
 
       setName("");
       setPhoneNumber("");
-      setConfirmPassword("");
 
       setEmail("");
       setPassword("");
+      setDate("")
       alert("Form submitted successfully!");
-      Navigate("/Homepage")
+      Navigate("/Homepage");
     } else {
       console.log("Form has errors, please correct them");
       alert(
@@ -194,10 +216,7 @@ const Signup = ({ darkMode, setDarkMode }) => {
           <div className="underline  w-[60px] h-[6px] bg-[#162938] rounded-lg"></div>
         </div>
 
-        <form
-          className="form-inputs form-inputs mt-[50px] flex flex-col justify-center items-center gap-[25px]"
-          
-        >
+        <form className="form-inputs form-inputs mt-[50px] flex flex-col justify-center items-center gap-[25px]">
           <div className="inputs flex flex-col items-center gap-3">
             <div className="flex items-center justify-center gap-3   border-2 border-[rgba(41,36,189,0.267)] rounded-[40px]">
               <img className="px-4" src={emailicon} alt="email icon" />
@@ -236,6 +255,24 @@ const Signup = ({ darkMode, setDarkMode }) => {
 
           <div className="inputs flex flex-col items-center gap-3">
             <div className="flex items-center justify-center gap-3   border-2 border-[rgba(41,36,189,0.267)] rounded-[40px]">
+              <img className="px-4" src={passwordicon} alt="password icon" />
+              <input
+                className="h-[50px] w-[400px] bg-transparent border-none outline-none font-[#162938] text-[19px] placeholder:text-[#162938] placeholder:font-[500] "
+                type="text"
+                value={Username}
+                id="usernaame"
+                placeholder="Enter Username"
+                onChange={handleUsername}
+              />
+            </div>
+
+            <div className="showerror text-red-600 text-center">
+              {UsernameError && <div className="error">{UsernameError}</div>}
+            </div>
+          </div>
+
+          <div className="inputs flex flex-col items-center gap-3">
+            <div className="flex items-center justify-center gap-3   border-2 border-[rgba(41,36,189,0.267)] rounded-[40px]">
               <img className="px-4" src={personicon} alt="password icon" />
               <input
                 className="h-[50px] w-[400px] bg-transparent border-none outline-none font-[#162938] text-[19px] placeholder:text-[#162938] placeholder:font-[500] "
@@ -249,26 +286,6 @@ const Signup = ({ darkMode, setDarkMode }) => {
 
             <div className="showerror text-red-600 text-center">
               {nameError && <div className="error">{nameError}</div>}
-            </div>
-          </div>
-
-          <div className="inputs flex flex-col items-center gap-3">
-            <div className="flex items-center justify-center gap-3   border-2 border-[rgba(41,36,189,0.267)] rounded-[40px]">
-              <img className="px-4" src={passwordicon} alt="password icon" />
-              <input
-                className="h-[50px] w-[400px] bg-transparent border-none outline-none font-[#162938] text-[19px] placeholder:text-[#162938] placeholder:font-[500] "
-                type="password"
-                value={confirmPassword}
-                id="confirm-password"
-                placeholder="Confirm your password"
-                onChange={handleConfirmPassword}
-              />
-            </div>
-
-            <div className="showerror text-red-600 text-center">
-              {confirmPassError && (
-                <div className="error">{confirmPassError}</div>
-              )}
             </div>
           </div>
 
@@ -295,11 +312,17 @@ const Signup = ({ darkMode, setDarkMode }) => {
               <img className="px-4" src={passwordicon} alt="password icon" />
               <input
                 className="h-[50px] w-[400px] bg-transparent border-none outline-none font-[#162938] text-[19px] placeholder:text-[#162938] placeholder:font-[500] "
-                type="date"
-                required
+                type="text"
+                value={date}
                 id="date"
+                placeholder="Enter date"
+                onChange={handleDate}
               />
             </div>
+            <div className="showerror text-red-600 text-center">
+              {dateError && <div className="error">{dateError}</div>}
+            </div>
+         
           </div>
 
           <p className=" forgotpas pr-[250px] text-[15px] ">
@@ -316,7 +339,8 @@ const Signup = ({ darkMode, setDarkMode }) => {
             <button
               type="submit"
               className="submit  w-[220px] h-[59px] text-white bg-[#162938] rounded-[50px] text-[19px] font-[700] cursor-pointer "
-            onClick={handleclick}>
+              onClick={handleclick}
+            >
               Submit
             </button>
           </div>

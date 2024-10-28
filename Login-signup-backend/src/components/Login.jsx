@@ -4,10 +4,11 @@ import "./LightDark.css"
 import emailicon from "../assets/email.png";
 import passwordicon from "../assets/password.png";
 import { useNavigate  } from "react-router-dom";
+import { toast } from 'react-hot-toast';
+import axios from "axios";
 const Login = ({ darkMode, setDarkMode }) => {
   const Navigate = useNavigate();
-  const emailcheck =
-    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+  const emailcheck =/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
 
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -46,27 +47,42 @@ const Login = ({ darkMode, setDarkMode }) => {
     }
   };
 
+  const getdata = async () => {
+    try {
+      const reqbody = {
+        "email": email,
+        "password": password,
+      }
+      const response = await axios.post('https://auth-backend-138t.onrender.com/api/v1/users/login', reqbody)
+      if (response.status === 200 && response.data) { 
+        Navigate("/Homepage")
+      }
+    }
+    catch (error) {
+      toast.error("Invalid Credentials")
+    }
+  };
+
   const handleclick = (e) => {
     e.preventDefault();
     let isValid = true;
-    let errorMessages = [];
 
     // Checking regex error
     if (emailError ||  passError) {
         isValid = false;
-        errorMessages.push("Please fix all validation errors before submitting.");
+        toast.error("Please fix all validation errors before submitting.");
     }
 
     // Checking empty field
     if (!email) {
         setEmailError("Email is required");
-        errorMessages.push("Email is required");
+        toast.error("Email is required");
         isValid = false;
     }
     
     if (!password) {
         setPassError("Password is required");
-        errorMessages.push("Password is required");
+        toast.error("Password is required");
         isValid = false;
     }
 
@@ -79,15 +95,10 @@ const Login = ({ darkMode, setDarkMode }) => {
           };
         console.log("Form data:", formData);
         
-
+          getdata();
 
         setEmail("");
         setPassword("");
-        alert("Form submitted successfully!");
-        Navigate("/Homepage")
-    } else {
-        console.log("Form has errors, please correct them");
-        alert(`Form submission failed. Please correct the following errors:\n${errorMessages.join("\n")}`);
     }
 
 
@@ -182,6 +193,7 @@ const Login = ({ darkMode, setDarkMode }) => {
           </div>
         </form>
       </div>
+      
     </div>
   );
 };
